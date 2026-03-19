@@ -1,0 +1,5 @@
+ABC Aceptada
+BB Rechazada
+ABABABC Aceptada
+ABABABCBBB Aceptada
+AB Rechazada
