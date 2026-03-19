@@ -1,6 +1,4 @@
-Declaraciones y Definiciones en C
-
----
+# Declaraciones y Definiciones en C
 
 ### ¿Qué es una Declaración?
 
