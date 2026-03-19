@@ -1,0 +1,3 @@
+G:/Mi unidad/sistemas/AYUDANTIA/Clases C/Punteros_2025/cmake-build-debug/CMakeFiles/Puntero_2025.dir
+G:/Mi unidad/sistemas/AYUDANTIA/Clases C/Punteros_2025/cmake-build-debug/CMakeFiles/edit_cache.dir
+G:/Mi unidad/sistemas/AYUDANTIA/Clases C/Punteros_2025/cmake-build-debug/CMakeFiles/rebuild_cache.dir
