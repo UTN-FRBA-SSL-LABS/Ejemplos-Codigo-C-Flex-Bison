@@ -50,10 +50,10 @@ Para construir un proyecto modular, se deben incluir todos los archivos fuente e
 
 ```bash
 # Compilar todas las unidades de traducción
-gcc src/main.c src/operaciones.c -Iinclude -o bin/programa
+gcc src/main.c src/operaciones.c -Iinclude -o programa
 
 # Ejecutar el programa generado
-./bin/programa
+./programa
 ```
 
 **Nota**: La bandera -Iinclude le indica al compilador la ruta de la carpeta donde se encuentran nuestros encabezados. A medida que el proyecto crece, este proceso de compilación manual se vuelve complejo y se facilita significativamente mediante el uso de herramientas de automatización como Make.
