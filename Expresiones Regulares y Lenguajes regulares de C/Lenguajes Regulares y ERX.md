@@ -1,4 +1,4 @@
-### UTN - FRBA - Sintaxis y Semántica de los Lenguajes - 2026
+### UTN - FRBA - Sintaxis y Semántica de los Lenguajes
 # Lenguajes Regulares
 
 ## Definir (ER), Producir (GR) y Reconocer (AF) los Lenguajes regulares

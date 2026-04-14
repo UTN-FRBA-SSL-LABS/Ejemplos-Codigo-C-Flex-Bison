@@ -1,4 +1,4 @@
-### UTN - FRBA - Sintaxis y Semántica de los Lenguajes - 2026
+### UTN - FRBA - Sintaxis y Semántica de los Lenguajes
 
 # Lenguajes Regulares en C
 
