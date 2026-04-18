@@ -89,9 +89,9 @@ Una buena práctica que se puede utilizar con la función fopen es utilizarla de
 
 FILE *fichero;
 
-  if((fichero == fopen("nomfichero.dat",r)) == NULL){
+if((fichero = fopen("nomfichero.dat","r")) == NULL){
      /* control para la apertura */
-     printf("Error en la apertura. Es posible que el fichero no exista \n")
+     printf("Error en la apertura. Es posible que el fichero no exista \n");
 }
 
 ```
@@ -105,7 +105,19 @@ Cuando se termine de utilizar el fichero, es importantísimo cerrarlo para liber
 fclose(fichero);
 ```
 
-> ⚠️ Es **muy importante** cerrar el archivo para liberar memoria.
+> ⚠️ Es **muy importante** cerrar el archivo para liberar memoria y asegurarse de que los datos se guarden correctamente.
+
+---
+
+## 🧭 El Concepto de Indicador de Posición (Puntero Interno)
+
+Antes de operar con un archivo, es vital entender que la estructura `FILE` mantiene internamente un **indicador de posición**. Este actúa como un cursor invisible que señala en qué byte se realizará la próxima operación.
+
+1. **Al abrir el archivo:**
+   - En modo `"r"` o `"w"`, el indicador comienza en el **byte 0** (inicio).
+   - En modo `"a"`, el indicador se sitúa al **final** del contenido existente.
+2. **Durante la operación:** Cada vez que usas `fread` o `fwrite`, el indicador **avanza automáticamente** tantos bytes como datos hayas procesado.
+3. **Persistencia:** Este cursor se mantiene "vivo" mientras el archivo esté abierto, permitiendo lecturas o escrituras consecutivas sin solaparse.
 
 ---
 
@@ -130,10 +142,10 @@ fwrite(direccion, tamaño, cantidad, fichero);
 
 ### 🔍 Parámetros:
 
-- direccion: es la dirección del dato que se quiere ingresar en el archivo. Si el dato lo asignamos a una variable, podemos colocar la variable con el referenciador &.
-- tamaño: acá tenemos que colocar el tamaño que va a necesitar en memoria lo que queremos escribir en el archivo, por ejemplo, si queremos introducir un INT, necesitamos el tamaño que ocupa un INT en memoria. Como hay tantos tipos de datos y la verdad no es necesario acordarse cuanto ocupa cada uno, lo que podemos utilizar allí es la función sizeof(). Esta función lo que devuelve es el espacio que ocupa un tipo de dato. Por lo cual, allí podremos colocar sizeof(Int), y devolverá el espacio que ocupa un int (4 bytes).
-- cantidad: Indica la cantidad de datos que vamos a ingresar en el archivo.
-- fichero: es el fichero donde queremos escribir el dato.
+- `direccion`: es la dirección del dato que se quiere ingresar en el archivo. Si el dato lo asignamos a una variable, podemos colocar la variable con el referenciador &.
+- `tamaño`: acá tenemos que colocar el tamaño que va a necesitar en memoria lo que queremos escribir en el archivo, por ejemplo, si queremos introducir un INT, necesitamos el tamaño que ocupa un INT en memoria. Como hay tantos tipos de datos y la verdad no es necesario acordarse cuanto ocupa cada uno, lo que podemos utilizar allí es la función sizeof(). Esta función lo que devuelve es el espacio que ocupa un tipo de dato. Por lo cual, allí podremos colocar sizeof(Int), y devolverá el espacio que ocupa un int (4 bytes).
+- `cantidad`: Indica la cantidad de datos que vamos a ingresar en el archivo.
+- `fichero`: es el fichero donde queremos escribir el dato.
 
 ---
 
@@ -175,7 +187,7 @@ fclose(entrada);
 
 ### 📊 Leer múltiples datos
 
-Bueno, lo que hay que entender en este caso, es que cada dato que se lea ocupara un espacio distinto en memoria, por lo cual, si quisiésemos por ejemplo leer 3 datos, requeriríamos que se almacenen en un vector de 4 espacios, como en el siguiente ejemplo:
+Bueno, lo que hay que entender en este caso, es que cada dato que se lea ocupara un espacio distinto en memoria, por lo cual, si quisiésemos por ejemplo leer 3 datos, requeriríamos que se almacenen en un vector de 3 espacios, como en el siguiente ejemplo:
 
 ```c
 int vector[3];
@@ -189,9 +201,39 @@ vector[0], vector[1], vector[2]
 
 ---
 
-## 🔧 Otras funciones útiles
+## 🎯 Acceso Aleatorio: `fseek` y `ftell`
+
+El acceso aleatorio permite movernos a cualquier punto del archivo sin necesidad de leerlo de forma secuencial desde el inicio.
+
+### 📍 Función `fseek`
+Se utiliza para mover el indicador de posición del flujo (puntero de archivo) a una ubicación específica.
+
+``` c
+int fseek(FILE *fichero, long desplazamiento, int origen);
+```
+### 🔍 Parámetros:
+* `desplazamiento:` Número de bytes que queremos mover el puntero (puede ser positivo o negativo).
+* `origen:` Define desde dónde se empieza a contar el desplazamiento. Existen tres constantes definidas en `stdio.h`:
+    * `SEEK_SET`: Comienzo del archivo.
+    * `SEEK_CUR`: Posición actual del puntero.
+    * `SEEK_END`: Final del archivo.
+
+
+### 📏 Función `ftell`
+Esta función nos informa en qué byte exacto nos encontramos parados dentro del archivo.
+
+
+```c
+ftell(FILE *fichero);
+```
+
+### ↩️ Retorno 
+Devuelve un valor `long` que representa la distancia en bytes desde el inicio del archivo hasta la posición actual.
 
 ---
+
+
+## 🔧 Otras funciones útiles
 
 ### 🖨️ `fprintf`
 
