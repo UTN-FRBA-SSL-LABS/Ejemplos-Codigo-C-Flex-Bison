@@ -39,6 +39,113 @@ int main(void)
 
 🔑 **Clave:** accedemos a campos internos encadenando con `.`.
 
+### Ejemplo con memoria dinámica y estructura anidada (C89, manejo seguro):
+
+```c
+/* ejemplo_dinamico.c  -- compilar: gcc -std=c89 -Wall ejemplo_dinamico.c -o ejemplo_dinamico */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Fecha {
+    int dia;
+    int mes;
+    int anio;
+};
+
+struct Persona {
+    char *nombre;          /* dinámico: requiere free */
+    int edad;
+    struct Fecha nacimiento;
+    int *notas;            /* arreglo dinámico */
+    size_t cant_notas;     /* cantidad válida en 'notas' */
+};
+
+/* Crea y devuelve una Persona nueva; el llamador (caller) debe usar free (liberar_persona). */
+struct Persona *crear_persona(const char *nombre, int edad, struct Fecha nac)
+{
+    struct Persona *p;
+
+    p = (struct Persona *) malloc(sizeof *p);
+    if (!p) return NULL;
+
+    p->nombre = (char *) malloc(strlen(nombre) + 1);
+    if (!p->nombre) {
+        free(p);
+        return NULL;
+    }
+
+    strcpy(p->nombre, nombre);
+    p->edad = edad;
+    p->nacimiento = nac;
+    p->notas = NULL;
+    p->cant_notas = 0;
+    return p;
+}
+
+/* Agrega una nota al arreglo dinámico usando realloc seguro. */
+int agregar_nota(struct Persona *p, int nota)
+{
+    int *tmp;
+    size_t nuevo_len;
+
+    if (!p) return 0;
+
+    nuevo_len = p->cant_notas + 1;
+    /* BUENA_PRÁCTICA: usar tmp para no perder el bloque original en caso de fallo */
+    tmp = (int *) realloc(p->notas, nuevo_len * sizeof *p->notas);
+    if (!tmp) {
+        return 0; /* realloc falló; 'p->notas' sigue válido */
+    }
+
+    p->notas = tmp;
+    p->notas[p->cant_notas] = nota;
+    p->cant_notas = nuevo_len;
+    return 1;
+}
+
+void liberar_persona(struct Persona *p)
+{
+    if (!p) return;
+    free(p->nombre); /* liberar campos dinámicos primero */
+    free(p->notas);
+    free(p);
+}
+
+int main(void)
+{
+    struct Fecha f = {15, 6, 1998};
+    struct Persona *ana;
+
+    ana = crear_persona("Ana", 25, f);
+    if (!ana) {
+        fprintf(stderr, "Error: no se pudo crear persona\n");
+        return 1;
+    }
+
+    if (!agregar_nota(ana, 9) || !agregar_nota(ana, 7)) {
+        fprintf(stderr, "Error: no se pudo agregar nota\n");
+        liberar_persona(ana);
+        return 1;
+    }
+
+    printf("===== PERSONA DINÁMICA =====\n");
+    printf("%s (%d años)\n", ana->nombre, ana->edad);
+    {
+        size_t i;
+        for (i = 0; i < ana->cant_notas; ++i) {
+            printf("Nota %lu: %d\n", (unsigned long)(i + 1), ana->notas[i]);
+        }
+    }
+
+    liberar_persona(ana);
+    return 0;
+}
+```
+
+> Nota técnica: cuando `realloc` falla, devuelve `NULL` y el bloque original sigue siendo válido. Por eso se guarda primero en una variable auxiliar. Recién cuando el llamado devuelve un puntero no nulo se reemplaza el anterior.
+
+
 ---
 
 ## 2) Alcance de variables (_scope_)
