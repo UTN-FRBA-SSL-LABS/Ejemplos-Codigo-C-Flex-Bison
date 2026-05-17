@@ -402,4 +402,20 @@ int main(void) {
 }
 ```
 
-⚠️ Al salir de `crea_invalida`, la variable `s` se destruye y el puntero queda **colgando**. Usarlo produce **comportamiento indefinido**.
+La corrección conceptual es importante: `s` es un arreglo automático, reservado en la pila de la llamada. Su existencia termina al salir de `crea_invalida`. El puntero devuelto no apunta a un objeto válido después del `return`; conserva una dirección, pero esa dirección ya no referencia memoria utilizable para ese objeto. A partir de ese punto, cualquier acceso a través de ese puntero tiene **comportamiento indefinido:** puede parecer que funciona, puede leer basura o puede provocar un fallo inmediato.
+
+Si se necesita devolver una cadena desde una función, la alternativa correcta es reservar memoria dinámica, copiar el contenido allí y transferir la responsabilidad de liberarla al llamador.
+
+### Recomendaciones prácticas
+- Siempre comprobar valores retornados por `malloc`, `calloc` y `realloc`.
+- Liberar en orden: primero campos dinámicos dentro de la estructura, luego la estructura en sí.
+- Después de `free(ptr);` es buena práctica asignar `ptr = NULL;` si el puntero seguirá en alcance.
+- Para `realloc`: usar un `tmp` intermedio y sólo asignar al campo si `tmp != NULL`.
+
+Patrón seguro de `realloc` (resumen):
+
+```c
+int *tmp = (int *) realloc(v, nuevo_tam * sizeof *v);
+if (tmp) v = tmp; /* OK */
+else { /* manejar fallo: 'v' sigue apuntando al bloque original */ }
+```
