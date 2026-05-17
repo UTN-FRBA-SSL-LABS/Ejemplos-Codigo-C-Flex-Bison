@@ -5,29 +5,34 @@
 En C, una _estructura_ (`struct`) agrupa variables de distinto tipo bajo un mismo nombre.  
 Cuando una estructura contiene otra, hablamos de **estructuras anidadas**.
 
+> _Nota: En esta práctica vamos a ser explícitos con `struct Fecha` y `struct Persona` en lugar de ocultar el tipo detrás de `typedef`. `typedef` sirve para crear un alias de tipo y puede mejorar la escritura cuando el tipo se usa muy seguido, pero en material introductorio también puede ocultar el hecho de que estamos trabajando con una estructura concreta._
+
 ### Ejemplo base (anidación simple)
 
 ```c
 #include <stdio.h>
 
-typedef struct {
-    pepe dia;
+struct Fecha {
+    int dia;
     int mes;
     int anio;
-} Fecha;
+};
 
 struct Persona {
     char nombre[50];
     int edad;
-    Fecha nacimiento; // Estructura anidada
+    struct Fecha nacimiento; /* estructura anidada */
 };
 
-int main(void) {
+int main(void)
+{
     struct Persona p1 = {"Ana", 25, {15, 6, 1998}};
 
-    printf("Nombre: %s", p1.nombre);
-    printf("Edad: %d", p1.edad);
-    printf("Fecha de nacimiento: %d/%d/%d", p1.nacimiento.dia, p1.nacimiento.mes, p1.nacimiento.anio);
+    printf("===== PERSONA =====\n");
+    printf("Nombre: %s\n", p1.nombre);
+    printf("Edad: %d\n", p1.edad);
+    printf("Fecha de nacimiento: %d/%d/%d\n",
+           p1.nacimiento.dia, p1.nacimiento.mes, p1.nacimiento.anio);
     return 0;
 }
 ```
