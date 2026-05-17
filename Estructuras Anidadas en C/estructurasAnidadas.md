@@ -148,36 +148,40 @@ int main(void)
 
 ---
 
-## 2) Alcance de variables (_scope_)
+## 2) Alcance (scope) y `static` — notas y ejemplo
 
 El **alcance** determina desde dónde se puede **ver/usar** un identificador.
 
 - **Local**: declarado dentro de una función o bloque `{}`.
 - **Global**: declarado fuera de funciones, visible en todo el archivo.
 - **`static`**:
-  - Dentro de una función → conserva su valor entre llamadas (**tiempo de vida** extendido).
-  - A nivel de archivo → limita la **visibilidad** a ese archivo (no exporta el símbolo).
+    - `static` a nivel de archivo limita la visibilidad del símbolo a ese fichero (encapsulación simple).
+    - `static` dentro de una función extiende el tiempo de vida de la variable pero NO su visibilidad fuera de la función.
 
 ### Ejemplo de alcance
 
 ```c
+/* scope_example.c */
 #include <stdio.h>
 
-int global = 10; // global
+static int archivo_privado = 42; /* visible sólo en este fichero */
 
-void funcion(void) {
-    int local = 5;            // local
-    static int persist = 0;   // estática: mantiene estado
-    persist++; //persist = persist + 1;
+void f(void)
+{
+    static int contador = 0; /* persiste entre llamadas */
+    int local = 5;           /* vive sólo durante la llamada */
+
+    contador++;
+    archivo_privado++;
     local++;
-    global++;
-    printf("Local:%d Persist:%d Global:%d", local, persist, global);
+    printf("local=%d contador=%d archivo_privado=%d\n", local, contador, archivo_privado);
 }
 
-int main(void) {
-    funcion();
-    funcion();
-    funcion();
+int main(void)
+{
+    f();
+    f();
+    f();
     return 0;
 }
 ```
@@ -185,9 +189,9 @@ int main(void) {
 **Salida:**
 
 ```
-Local:6 Persist:1 Global:11
-Local:6 Persist:2 Global:12
-Local:6 Persist:3 Global:13
+local=6 contador=1 archivo_privado=43
+local=6 contador=2 archivo_privado=44
+local=6 contador=3 archivo_privado=45
 ```
 
 > ⚠️ Alcance ≠ tiempo de vida: una variable local en la pila **muere** al salir del bloque; una dinámica puede **sobrevivir** aunque el puntero salga de alcance (si quedó copiado en otro lado).
