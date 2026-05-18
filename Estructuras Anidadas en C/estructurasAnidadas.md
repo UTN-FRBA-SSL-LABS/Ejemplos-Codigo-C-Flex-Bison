@@ -5,67 +5,183 @@
 En C, una _estructura_ (`struct`) agrupa variables de distinto tipo bajo un mismo nombre.  
 Cuando una estructura contiene otra, hablamos de **estructuras anidadas**.
 
+> _Nota: En esta práctica vamos a ser explícitos con `struct Fecha` y `struct Persona` en lugar de ocultar el tipo detrás de `typedef`. `typedef` sirve para crear un alias de tipo y puede mejorar la escritura cuando el tipo se usa muy seguido, pero en material introductorio también puede ocultar el hecho de que estamos trabajando con una estructura concreta._
+
 ### Ejemplo base (anidación simple)
 
 ```c
 #include <stdio.h>
 
-typedef struct {
-    pepe dia;
+struct Fecha {
+    int dia;
     int mes;
     int anio;
-} Fecha;
+};
 
 struct Persona {
     char nombre[50];
     int edad;
-    Fecha nacimiento; // Estructura anidada
+    struct Fecha nacimiento; /* estructura anidada */
 };
 
-int main(void) {
+int main(void)
+{
     struct Persona p1 = {"Ana", 25, {15, 6, 1998}};
 
-    printf("Nombre: %s", p1.nombre);
-    printf("Edad: %d", p1.edad);
-    printf("Fecha de nacimiento: %d/%d/%d", p1.nacimiento.dia, p1.nacimiento.mes, p1.nacimiento.anio);
+    printf("===== PERSONA =====\n");
+    printf("Nombre: %s\n", p1.nombre);
+    printf("Edad: %d\n", p1.edad);
+    printf("Fecha de nacimiento: %d/%d/%d\n",
+           p1.nacimiento.dia, p1.nacimiento.mes, p1.nacimiento.anio);
     return 0;
 }
 ```
 
 🔑 **Clave:** accedemos a campos internos encadenando con `.`.
 
+### Ejemplo con memoria dinámica y estructura anidada (C89, manejo seguro):
+
+```c
+/* ejemplo_dinamico.c  -- compilar: gcc -std=c89 -Wall ejemplo_dinamico.c -o ejemplo_dinamico */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Fecha {
+    int dia;
+    int mes;
+    int anio;
+};
+
+struct Persona {
+    char *nombre;          /* dinámico: requiere free */
+    int edad;
+    struct Fecha nacimiento;
+    int *notas;            /* arreglo dinámico */
+    size_t cant_notas;     /* cantidad válida en 'notas' */
+};
+
+/* Crea y devuelve una Persona nueva; el llamador (caller) debe usar free (liberar_persona). */
+struct Persona *crear_persona(const char *nombre, int edad, struct Fecha nac)
+{
+    struct Persona *p;
+
+    p = (struct Persona *) malloc(sizeof *p);
+    if (!p) return NULL;
+
+    p->nombre = (char *) malloc(strlen(nombre) + 1);
+    if (!p->nombre) {
+        free(p);
+        return NULL;
+    }
+
+    strcpy(p->nombre, nombre);
+    p->edad = edad;
+    p->nacimiento = nac;
+    p->notas = NULL;
+    p->cant_notas = 0;
+    return p;
+}
+
+/* Agrega una nota al arreglo dinámico usando realloc seguro. */
+int agregar_nota(struct Persona *p, int nota)
+{
+    int *tmp;
+    size_t nuevo_len;
+
+    if (!p) return 0;
+
+    nuevo_len = p->cant_notas + 1;
+    /* BUENA_PRÁCTICA: usar tmp para no perder el bloque original en caso de fallo */
+    tmp = (int *) realloc(p->notas, nuevo_len * sizeof *p->notas);
+    if (!tmp) {
+        return 0; /* realloc falló; 'p->notas' sigue válido */
+    }
+
+    p->notas = tmp;
+    p->notas[p->cant_notas] = nota;
+    p->cant_notas = nuevo_len;
+    return 1;
+}
+
+void liberar_persona(struct Persona *p)
+{
+    if (!p) return;
+    free(p->nombre); /* liberar campos dinámicos primero */
+    free(p->notas);
+    free(p);
+}
+
+int main(void)
+{
+    struct Fecha f = {15, 6, 1998};
+    struct Persona *ana;
+
+    ana = crear_persona("Ana", 25, f);
+    if (!ana) {
+        fprintf(stderr, "Error: no se pudo crear persona\n");
+        return 1;
+    }
+
+    if (!agregar_nota(ana, 9) || !agregar_nota(ana, 7)) {
+        fprintf(stderr, "Error: no se pudo agregar nota\n");
+        liberar_persona(ana);
+        return 1;
+    }
+
+    printf("===== PERSONA DINÁMICA =====\n");
+    printf("%s (%d años)\n", ana->nombre, ana->edad);
+    {
+        size_t i;
+        for (i = 0; i < ana->cant_notas; ++i) {
+            printf("Nota %lu: %d\n", (unsigned long)(i + 1), ana->notas[i]);
+        }
+    }
+
+    liberar_persona(ana);
+    return 0;
+}
+```
+
+> Nota técnica: cuando `realloc` falla, devuelve `NULL` y el bloque original sigue siendo válido. Por eso se guarda primero en una variable auxiliar. Recién cuando el llamado devuelve un puntero no nulo se reemplaza el anterior.
+
+
 ---
 
-## 2) Alcance de variables (_scope_)
+## 2) Alcance (scope) y `static` — notas y ejemplo
 
 El **alcance** determina desde dónde se puede **ver/usar** un identificador.
 
 - **Local**: declarado dentro de una función o bloque `{}`.
 - **Global**: declarado fuera de funciones, visible en todo el archivo.
 - **`static`**:
-  - Dentro de una función → conserva su valor entre llamadas (**tiempo de vida** extendido).
-  - A nivel de archivo → limita la **visibilidad** a ese archivo (no exporta el símbolo).
+    - `static` a nivel de archivo limita la visibilidad del símbolo a ese fichero (encapsulación simple).
+    - `static` dentro de una función extiende el tiempo de vida de la variable pero NO su visibilidad fuera de la función.
 
 ### Ejemplo de alcance
 
 ```c
+/* scope_example.c */
 #include <stdio.h>
 
-int global = 10; // global
+static int archivo_privado = 42; /* visible sólo en este fichero */
 
-void funcion(void) {
-    int local = 5;            // local
-    static int persist = 0;   // estática: mantiene estado
-    persist++; //persist = persist + 1;
+void f(void)
+{
+    static int contador = 0; /* persiste entre llamadas */
+    int local = 5;           /* vive sólo durante la llamada */
+
+    contador++;
+    archivo_privado++;
     local++;
-    global++;
-    printf("Local:%d Persist:%d Global:%d", local, persist, global);
+    printf("local=%d contador=%d archivo_privado=%d\n", local, contador, archivo_privado);
 }
 
-int main(void) {
-    funcion();
-    funcion();
-    funcion();
+int main(void)
+{
+    f();
+    f();
+    f();
     return 0;
 }
 ```
@@ -73,9 +189,9 @@ int main(void) {
 **Salida:**
 
 ```
-Local:6 Persist:1 Global:11
-Local:6 Persist:2 Global:12
-Local:6 Persist:3 Global:13
+local=6 contador=1 archivo_privado=43
+local=6 contador=2 archivo_privado=44
+local=6 contador=3 archivo_privado=45
 ```
 
 > ⚠️ Alcance ≠ tiempo de vida: una variable local en la pila **muere** al salir del bloque; una dinámica puede **sobrevivir** aunque el puntero salga de alcance (si quedó copiado en otro lado).
@@ -286,4 +402,20 @@ int main(void) {
 }
 ```
 
-⚠️ Al salir de `crea_invalida`, la variable `s` se destruye y el puntero queda **colgando**. Usarlo produce **comportamiento indefinido**.
+La corrección conceptual es importante: `s` es un arreglo automático, reservado en la pila de la llamada. Su existencia termina al salir de `crea_invalida`. El puntero devuelto no apunta a un objeto válido después del `return`; conserva una dirección, pero esa dirección ya no referencia memoria utilizable para ese objeto. A partir de ese punto, cualquier acceso a través de ese puntero tiene **comportamiento indefinido:** puede parecer que funciona, puede leer basura o puede provocar un fallo inmediato.
+
+Si se necesita devolver una cadena desde una función, la alternativa correcta es reservar memoria dinámica, copiar el contenido allí y transferir la responsabilidad de liberarla al llamador.
+
+### Recomendaciones prácticas
+- Siempre comprobar valores retornados por `malloc`, `calloc` y `realloc`.
+- Liberar en orden: primero campos dinámicos dentro de la estructura, luego la estructura en sí.
+- Después de `free(ptr);` es buena práctica asignar `ptr = NULL;` si el puntero seguirá en alcance.
+- Para `realloc`: usar un `tmp` intermedio y sólo asignar al campo si `tmp != NULL`.
+
+Patrón seguro de `realloc` (resumen):
+
+```c
+int *tmp = (int *) realloc(v, nuevo_tam * sizeof *v);
+if (tmp) v = tmp; /* OK */
+else { /* manejar fallo: 'v' sigue apuntando al bloque original */ }
+```
