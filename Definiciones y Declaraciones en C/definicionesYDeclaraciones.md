@@ -1,49 +1,48 @@
 # Declaraciones y Definiciones en C
 
-### ¿Qué es una Declaración?
+## ¿Qué es una Declaración?
 
-Una **declaración** es una sentencia que introduce un nombre en una unidad de compilación, dándole existencia semántica. Informa al compilador que ese nombre representa una entidad (variable, función, estructura, etc.).
+Una **declaración** es una sentencia que introduce un nombre (identificador) en una unidad de compilación, asociándolo con un tipo. Le informa al compilador qué es ese nombre y cómo usarlo, pero **no necesariamente reserva memoria**.
 
 **Ejemplos:**
 
 ```c
-int x;
-int sumar(int, int);
-int sumar(int a, int b);
+int sumar(int, int);      // Declaración de función (prototipo)
+int sumar(int a, int b);  // Ídem, con nombres de parámetros (más legible)
+extern int x;             // Declaración de variable: existe en otro archivo
 ```
 
 **Resumen:**
 
 * Asocia un identificador con un tipo.
-* Informa al compilador sobre su uso.
-* No necesariamente reserva memoria (a menos que también sea definición).
+* Permite al compilador verificar usos correctos del identificador.
+* No siempre reserva espacio en memoria.
 
 ---
 
-### ¿Qué es una Definición?
+## ¿Qué es una Definición?
 
-Una **definición** es una declaración que además inicia la existencia física del objeto (reserva memoria).
+Una **definición** es una declaración que además reserva almacenamiento para el objeto. Todo objeto debe tener exactamente una definición en el programa (la llamada *One Definition Rule*).
 
 **Ejemplos:**
 
 ```c
-// Declaración sin definición
-extern int x;
+extern int x;   // Solo declaración: no reserva memoria,
+                // la definición está en otro archivo
 
-// Declaración con definición sin inicialización
-int x;
+int x;          // Declaración + definición: reserva memoria para x
+                // (el valor es indeterminado si es variable local — ver nota más abajo)
 
-// Declaración con definición e inicialización
-int x = 3;
+int x = 3;      // Declaración + definición + inicialización
 ```
 
-**Funciones:**
+### Funciones
 
 ```c
-// Declaración (prototipo)
+// Declaración (prototipo): le avisa al compilador la firma de la función
 int sumar(int a, int b);
 
-// Definición
+// Definición: implementa el cuerpo, aquí sí existe la función
 int sumar(int a, int b) {
     return a + b;
 }
