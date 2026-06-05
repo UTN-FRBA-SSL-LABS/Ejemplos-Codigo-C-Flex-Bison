@@ -50,12 +50,51 @@ int sumar(int a, int b) {
 
 ---
 
-### Secuencia vital de un objeto en C
+## Los tres conceptos clave
 
-1. **Declarar**: Asociar nombre con tipo.
-2. **Iniciar**: Reservar espacio en memoria.
-3. **Definir**: Declarar + Iniciar.
-4. **Inicializar**: Asignar valor inicial.
+| Concepto | Qué hace | Ejemplo |
+|---|---|---|
+| **Declaración** | Asocia un nombre con un tipo | `extern int x;` |
+| **Definición** | Declaración + reserva de almacenamiento | `int x;` |
+| **Inicialización** | Asigna un valor en el momento de la definición | `int x = 3;` |
+
+> **Nota importante:** Definición e inicialización son conceptos distintos.
+> Definir una variable reserva memoria; inicializarla le da un valor de partida.
+> Se pueden hacer juntos o por separado:
+>
+> ```c
+> int x;      // Definición sin inicialización
+> x = 5;     // Asignación posterior (no es inicialización)
+>
+> int y = 5;  // Definición con inicialización
+> ```
+
+---
+
+## ⚠️ Variables no inicializadas: comportamiento indeterminado
+
+Este es uno de los errores más comunes y peligrosos en C.
+
+```c
+void ejemplo(void) {
+    int x;          // Variable local: valor INDETERMINADO (basura de memoria)
+    printf("%d\n", x); // Comportamiento indefinido — puede imprimir cualquier cosa
+}
+```
+
+```c
+int global;         // Variable global o estática: se inicializa a 0 automáticamente
+static int s;       // Ídem
+```
+
+> K&R, Cap. 4: *"External and static variables are initialized to zero by default.
+> Automatic variables for which there is no explicit initializer have undefined values."*
+
+```c
+/* Buena práctica: Se recomienda siempre inicializar las variables locales
+   al momento de definirlas, para evitar comportamiento indeterminado. */
+int x = 0;
+```
 
 ---
 
