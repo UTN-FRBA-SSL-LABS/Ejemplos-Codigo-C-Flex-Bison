@@ -20,8 +20,8 @@ void yyerror(const char*);
 /* %require "2.4.1" */
 
 	/* Para requirle a Bison que describa más detalladamente los mensajes de error al invocar a yyerror */
-%error-verbose
-	/* Nota: esta directiva (escrita de esta manera) quedó obsoleta a partir de Bison v3.0, siendo reemplazada por la directiva: %define parse.error verbose */
+%define parse.error verbose
+	/* Nota: la forma antigua de esta directiva era %error-verbose, obsoleta a partir de Bison v3.0 */
 
 	/* Para activar el seguimiento de las ubicaciones de los tokens (número de linea, número de columna) */
 %locations
@@ -60,7 +60,14 @@ exp
         | exp exp '+'     { $$ = $1 + $2; }
         | exp exp '-'     { $$ = $1 - $2; }
         | exp exp '*'     { $$ = $1 * $2; }
-        | exp exp '/'     { $$ = $1 / $2; }
+        | exp exp '/'     {
+                        if($2 == 0)
+                        {
+                                fprintf(stderr, "Bison: %d:%d: Error semantico: No se puede dividir por 0\n", @1.first_line, @1.first_column);
+                                YYERROR;
+                        }
+                        else $$ = $1 / $2;
+                }
         | exp exp '^'     { $$ = pow($1, $2); }
         ;
 
