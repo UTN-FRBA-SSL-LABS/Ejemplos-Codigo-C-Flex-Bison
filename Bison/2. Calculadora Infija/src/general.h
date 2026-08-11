@@ -5,10 +5,10 @@
 
 typedef struct YYLTYPE
 {
-  unsigned int first_line;
-  unsigned int first_column;
-  unsigned int last_line;
-  unsigned int last_column;
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
 } YYLTYPE;
 
 #define INICIO_CONTEO_LINEA 1

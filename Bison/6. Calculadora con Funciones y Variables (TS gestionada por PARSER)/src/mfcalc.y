@@ -1,8 +1,9 @@
 %{
   #include <stdio.h>
-  #include <math.h>  
-  #include "calc.h"
+  #include <stdlib.h>	/* necesario para free() */
   #include <string.h>
+  #include <math.h>
+  #include "calc.h"
 
 void yyerror(char const *s){fprintf (stderr, "%s\n> ", s);}
 
@@ -44,9 +45,12 @@ line:
 
 exp:
   NUM                { $$ = $1;                          	}
-| ID                 { aux=getsym($<idval>1); if (aux) { $$=(aux->value.var)    ;} else { printf("La variable %s no esta declarada, se considera que posee valor cero \n",$1); $$=0; } }
-| ID '=' exp         { aux=getsym($<idval>1); if (aux) { $$=(aux->value.var)=$3 ;} else { printf("Se declara una nueva variable con nombre %s y se inicializa en %f \n",$1,$3); aux=putsym(strdup($1),TYP_VAR); $$=(aux->value.var)=$3 ;} }
-| ID '(' exp ')'     { aux=getsym($<idval>1); if (aux) { $$ = (*(aux->value.fnctptr))($3); } else { printf("La funcion %s no esta definida, se considera que retorna valor cero por defecto \n",$1); $$=0; } }
+	/* El scanner entrega el nombre con strdup(), asi que el parser es el
+	   responsable de liberarlo. putsym() ya hace su propia copia del nombre:
+	   volver a hacer strdup() al llamarla seria una fuga de memoria. */
+| ID                 { aux=getsym($1); if (aux) { $$=(aux->value.var)    ;} else { printf("La variable %s no esta declarada, se considera que posee valor cero \n",$1); $$=0; } free($1); }
+| ID '=' exp         { aux=getsym($1); if (aux) { $$=(aux->value.var)=$3 ;} else { printf("Se declara una nueva variable con nombre %s y se inicializa en %f \n",$1,$3); aux=putsym($1,TYP_VAR); $$=(aux->value.var)=$3 ;} free($1); }
+| ID '(' exp ')'     { aux=getsym($1); if (aux) { $$ = (*(aux->value.fnctptr))($3); } else { printf("La funcion %s no esta definida, se considera que retorna valor cero por defecto \n",$1); $$=0; } free($1); }
 | exp '+' exp        { $$ = $1 + $3;                    	}
 | exp '-' exp        { $$ = $1 - $3;                    	}
 | exp '*' exp        { $$ = $1 * $3;                    	}
