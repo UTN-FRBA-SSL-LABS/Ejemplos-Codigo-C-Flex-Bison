@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Símbolos de Preanálisis: Primero y Siguiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbfcf8; --grid:#e4ebf2; --ink:#1b2a4a; --ink-soft:#4b5a78; --line:#cdd6e2;
+  --card:#ffffff; --yellow:#fff27a; --cyan:#a9ecf4; --green:#b6efa0; --red:#b8322a; --blue:#1f5fbf;
+  --ok:#2f7d32; --okbg:#dff3d6; --badbg:#fbe1de;
+  --mono:'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  --sans:'Atkinson Hyperlegible', 'Segoe UI', system-ui, sans-serif;
+  --fs:18px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141b26; --grid:#1c2533; --ink:#e8edf6; --ink-soft:#a7b3c8; --line:#2c3a4f; --card:#1a2331;
+    --yellow:#6b6220; --cyan:#1f5a63; --green:#2e5a27; --red:#ff8a80; --blue:#8db8ff; --ok:#8ee08a; --okbg:#1f3a1d; --badbg:#4a2421;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141b26; --grid:#1c2533; --ink:#e8edf6; --ink-soft:#a7b3c8; --line:#2c3a4f; --card:#1a2331;
+  --yellow:#6b6220; --cyan:#1f5a63; --green:#2e5a27; --red:#ff8a80; --blue:#8db8ff; --ok:#8ee08a; --okbg:#1f3a1d; --badbg:#4a2421;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; overflow-x:hidden; font-family:var(--sans); font-size:var(--fs); line-height:1.55; color:var(--ink);
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg,var(--grid) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+mark{background:var(--yellow);color:inherit;padding:0 .15em;border-radius:2px}
+mark.c{background:var(--cyan)} mark.g{background:var(--green)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+
+/* top bar */
+header{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:10;
+  background:var(--paper); border-bottom:2px solid var(--ink);
+  display:flex; align-items:center; gap:24px; padding:10px 24px; flex-wrap:wrap;
+}
+header h1{font-size:1.15em;margin:0;font-weight:700;letter-spacing:.01em}
+nav{display:flex;gap:4px}
+nav button{border:2px solid transparent;background:none;padding:6px 14px;border-radius:999px;font-weight:700}
+nav button[aria-selected="true"]{border-color:var(--ink);background:var(--yellow)}
+.tools{margin-left:auto;display:flex;gap:6px}
+.tools button{border:1.5px solid var(--line);background:var(--card);border-radius:8px;padding:4px 10px;min-width:40px}
+
+main{width:100%;margin:0;padding:28px clamp(16px,3vw,48px) 80px}
+section[hidden]{display:none}
+
+/* theory */
+.theory{max-width:none}
+.theory h2{font-size:1.7em;margin:1.6em 0 .4em;line-height:1.2;border-bottom:2px solid var(--ink);padding-bottom:.2em}
+.theory h2:first-child{margin-top:.2em}
+.theory h3{font-size:1.2em;margin:1.3em 0 .3em}
+.theory p,.theory li{max-width:none}
+.theory ul,.theory ol{padding-left:1.4em}
+pre{
+  font-family:var(--mono);font-size:.9em;line-height:1.6;background:var(--card);border:1.5px solid var(--line);
+  border-left:5px solid var(--blue);border-radius:6px;padding:14px 18px;margin:.8em 0;white-space:pre-wrap;overflow-wrap:anywhere;
+}
+.note{border-left:5px solid var(--red);background:var(--card);padding:10px 16px;border-radius:0 6px 6px 0;margin:1em 0}
+.result{font-family:var(--mono);font-weight:600;background:var(--green);display:inline-block;padding:2px 10px;border-radius:4px}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 1.5em;font-size:.95em}
+.toc a{color:var(--blue)}
+
+/* class mode */
+.class-layout{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);gap:28px;align-items:start}
+.ex-list{position:sticky;top:90px;display:flex;flex-direction:column;gap:6px}
+.ex-list button{
+  text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;line-height:1.3;
+}
+.ex-list button[aria-current="true"]{border:2px solid var(--ink);background:var(--yellow)}
+.ex-list small{display:block;color:var(--ink-soft);font-size:.8em;margin-top:2px}
+.stage{display:flex;flex-direction:column;gap:20px;min-width:0}
+.stage-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
+.panel{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:16px 20px;min-width:0}
+.panel h3{margin:0 0 8px;font-size:1em;color:var(--ink-soft);font-weight:700}
+.grammar pre{margin:0;border:none;border-left:5px solid var(--blue);background:transparent;padding:4px 0 4px 14px;font-size:1.05em}
+.board{min-height:140px}
+.board ol{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:.95em}
+.board li{padding:4px 0;border-bottom:1px dashed var(--line);overflow-wrap:anywhere}
+.board li:last-child{border-bottom:none}
+.board li.new{animation:ink .5s ease-out}
+.board .empty{color:var(--ink-soft);font-family:var(--sans);font-style:italic}
+@keyframes ink{from{background:var(--yellow)}to{background:transparent}}
+
+.question{border:2.5px solid var(--ink);border-radius:12px;background:var(--card);padding:22px 26px}
+.q-meta{display:flex;align-items:center;gap:12px;margin-bottom:10px;color:var(--ink-soft);font-size:.9em}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots span{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink-soft)}
+.dots span.done{background:var(--ink-soft)}
+.dots span.cur{background:var(--yellow);border-color:var(--ink)}
+.goal{margin-left:auto;font-weight:700;color:var(--ink);background:var(--cyan);padding:2px 10px;border-radius:4px}
+.q-text{font-size:1.6em;line-height:1.3;margin:0 0 18px;font-weight:700}
+.opts{display:flex;flex-wrap:wrap;gap:10px}
+.opts button{
+  border:2px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 16px;font-size:1.1em;
+  display:flex;gap:10px;align-items:baseline;text-align:left;
+}
+.opts button .k{font-family:var(--mono);font-size:.75em;color:var(--ink-soft)}
+.opts button.sel{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
+.opts button.right{border-color:var(--ok);background:var(--okbg)}
+.opts button.wrong{border-color:var(--red);background:var(--badbg)}
+.opts button:disabled{cursor:default}
+.answer{margin-top:18px;padding:14px 18px;border-left:5px solid var(--ok);background:var(--okbg);border-radius:0 8px 8px 0;font-size:1.1em}
+.answer[hidden]{display:none}
+.answer pre{margin:.6em 0;font-size:.9em}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;align-items:center}
+.btn{border:2px solid var(--ink);background:var(--card);border-radius:999px;padding:8px 18px;font-weight:700}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn:disabled{opacity:.4;cursor:default}
+.hint{color:var(--ink-soft);font-size:.85em;margin-left:auto}
+.finished{font-size:1.4em;font-weight:700}
+
+@media (max-width:860px){
+  .class-layout,.stage-top{grid-template-columns:1fr}
+  .ex-list{position:static;flex-direction:row;flex-wrap:wrap}
+  .ex-list button{flex:1 1 180px}
+  header{gap:10px}
+  .tools{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){ .board li.new{animation:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Primero y Siguiente</h1>
+  <nav role="tablist" aria-label="Secciones">
+    <button role="tab" id="tab-teoria" aria-selected="true" data-target="teoria">Teoría</button>
+    <button role="tab" id="tab-clase" aria-selected="false" data-target="clase">En clase</button>
+  </nav>
+  <div class="tools">
+    <button id="fs-down" aria-label="Achicar texto">A−</button>
+    <button id="fs-up" aria-label="Agrandar texto">A+</button>
+    <button id="theme" aria-label="Cambiar tema claro u oscuro">◐</button>
+  </div>
+</header>
+
+<main>
+<!-- ================= TEORÍA ================= -->
+<section id="teoria" class="theory" role="tabpanel" aria-labelledby="tab-teoria">
+  <div class="toc">
+    <a href="#t-para">¿Para qué sirven?</a><a href="#t-prim">Primero</a><a href="#t-conf">Primero sin conflictos</a>
+    <a href="#t-eps">¿Y si puede ser ε?</a><a href="#t-sig">Siguiente</a><a href="#t-primeps">Primero con ε</a>
+  </div>
+
+  <h2 id="t-para">¿Para qué sirven?</h2>
+  <p>Para construir un parser <mark>descendente LL(1)</mark>, para cada no terminal el parser tiene que poder decidir <b>qué producción aplicar</b> conociendo sólo el <mark class="c">símbolo de preanálisis</mark>: el <b>próximo token</b> del flujo de tokens.</p>
+  <p>Lo podemos pensar como una función:</p>
+  <pre>δ: (NoTerminal, Token) -> Producción a aplicar</pre>
+  <ul>
+    <li>Si la gramática es <b>LL(1)</b>, δ cumple <b>unicidad</b>: para cada par hay una sola producción.</li>
+    <li>Si el par (NoTerminal, Token) <b>no está definido</b> → <b>error sintáctico</b>.</li>
+  </ul>
+  <div class="note">Los conjuntos se calculan <b>una única vez</b> para una gramática. El analizador ya los tiene precalculados y, al leer un token, sabe qué producción aplicar.</div>
+
+  <h2 id="t-prim">Conjunto Primero</h2>
+  <p><b>Primero(X1...Xn)</b> = los terminales con los que <mark>puede empezar</mark> lo que se deriva de X1...Xn.<br>Si X1...Xn puede derivar en ε, <b>ε también va en el conjunto</b>.</p>
+  <h3>Cómo lo calculo</h3>
+  <ul>
+    <li>Si X1 es un <b>terminal</b> → Primero(X1...Xn) = <b>{X1}</b></li>
+    <li>Si X1 es un <b>no terminal</b> → Primero(X1...Xn) = <b>Primero(X1)</b></li>
+  </ul>
+  <pre>A -> 12BC4</pre>
+  <p>Primero(12BC4) = <span class="result">{1}</span> → empieza con un terminal, listo.</p>
+
+  <h2 id="t-conf">Primero sin conflictos</h2>
+  <p>Para que no haya conflictos, los <b>Primero de los lados derechos</b> de un mismo no terminal tienen que ser <mark>disjuntos</mark> (sin tokens en común).</p>
+  <pre>Primero(prod. 1) ∩ Primero(prod. 2) = ∅     (para cualquier par de producciones)</pre>
+  <h3>Ejemplo</h3>
+  <pre>A -> 1234 | B235 | C112 | 237
+B -> 5 | 41
+C -> 21 | 25 | 3</pre>
+  <ul>
+    <li>Primero(1234) = {1}</li>
+    <li>Primero(B235) = Primero(B) = {4, 5}</li>
+    <li>Primero(C112) = Primero(C) = {<b>2</b>, 3}</li>
+    <li>Primero(237) = {<b>2</b>}</li>
+  </ul>
+  <p>¿Hay conflicto? <mark>Sí</mark> → C112 y 237 comparten el token <b>2</b>.</p>
+  <p>¿Cómo lo resolvemos? <b>Desagregamos C</b> para verlo mejor:</p>
+  <pre>A -> 1234 | B235 | 21112 | 25112 | 3112 | 237</pre>
+  <p>Y sacamos el <b>2</b> como factor común:</p>
+  <pre>A -> 1234 | B235 | 3112 | 2Z
+Z -> 1112 | 5112 | 37</pre>
+  <p><b>Conflicto eliminado.</b> Primero(A) sigue siendo el mismo, pero ahora cada lado derecho tiene un Primero <b>disjunto</b> de los demás.</p>
+
+  <h2 id="t-eps">¿Y si un no terminal puede ser ε?</h2>
+  <p>Si X1 puede generar ε, X1 puede <b>desaparecer</b>. Entonces Primero(X1...Xn) no depende sólo de X1: <b>también depende de lo que viene después de X1</b>.</p>
+  <p>A eso que viene después lo llamamos <mark class="c">Siguiente</mark>.</p>
+
+  <h2 id="t-sig">Conjunto Siguiente</h2>
+  <p><b>Siguiente(A)</b> = los terminales que pueden aparecer <mark>justo después</mark> de A en las derivaciones. Define el <b>contexto derecho</b> de A. <b>Nunca lleva ε.</b></p>
+  <h3>Cómo lo calculo</h3>
+  <p>Busco <b>dónde aparece A</b> del lado derecho de las producciones:</p>
+  <ul>
+    <li><code>...Ax...</code> → A seguido de un terminal → <b>x</b> va al Siguiente(A)</li>
+    <li><code>...AB...</code> → A seguido de un no terminal → va <b>Primero(B) sin ε</b> (y si B puede ser ε, sigo mirando lo que viene después)</li>
+    <li><code>T -> ...A</code> → A es el último símbolo → va <b>Siguiente(T)</b></li>
+  </ul>
+  <h3>Ejemplo</h3>
+  <pre>T -> A5
+A -> BCD
+B -> 1 | 2 | ε
+C -> 3 | ε
+D -> 3 | 4 | ε</pre>
+  <p>Siguiente(A)? ¿Dónde aparece A? En <b>T -> A5</b>. Después de A viene el 5.</p>
+  <p>Entonces, <span class="result">Siguiente(A) = {5}</span></p>
+  <p>Siguiente(C)? ¿Dónde aparece C? En <b>A -> BCD</b>. Después de C viene D → tomo Primero(D) sin ε = {3, 4}. ¿D puede ser ε? <b>Sí</b> → C queda al final de A, así que también va Siguiente(A) = {5}.</p>
+  <p>Entonces, <span class="result">Siguiente(C) = {3, 4, 5}</span></p>
+
+  <h2 id="t-primeps">Primero cuando aparece ε</h2>
+  <p>Ahora sí: si X1 <b>puede generar ε</b> →</p>
+  <pre>Primero(X1...Xn) = Primero(X1) U Siguiente(X1)</pre>
+  <p>Si se termina la producción, <b>subo</b> y tomo el Siguiente del no terminal de arriba.</p>
+  <h3>Ejemplo 1</h3>
+  <pre>T -> A5
+A -> BCD
+B -> 1 | 2 | ε
+C -> 3 | ε
+D -> 3 | 4 | ε</pre>
+  <p>Existe la posibilidad de que A genere (derive) la palabra nula ε.</p>
+  <pre>Primero(T) = Primero(A5) = Primero(BCD) = {1,2} U Siguiente(B)
+
+           = {1,2} U Primero(CD) = {1,2} U {3} U Siguiente(C)
+
+           = {1,2} U {3} U Primero(D) = {1,2} U {3} U {3,4} U Siguiente(A)
+
+           = {1,2} U {3} U {3,4} U {5}</pre>
+  <p><span class="result">Siguiente(A) = {5}</span> &nbsp; <span class="result">Primero(T) = {1, 2, 3, 4, 5}</span></p>
+  <h3>Ejemplo 2</h3>
+  <pre>T -> AE8
+A -> BCD
+B -> 1 | 2 | ε
+C -> 3 | ε
+D -> 3 | 4 | ε
+E -> C | 7</pre>
+  <pre>Primero(T) = Primero(AE8) = Primero(BCD) = {1,2} U Primero(CD) = {1,2} U {3} U Primero(D)
+
+           = {1,2} U {3} U {3,4} U Siguiente(A)
+
+Primero(T) = {1,2,3,4} U Siguiente(A) = {1,2,3,4} U Primero(E)
+
+           = {1,2,3,4} U {7} U Primero(C) = {1,2,3,4} U {7} U {3} U Siguiente(E)
+
+Primero(T) = {1,2,3,4} U {7} U {3} U {8}</pre>
+  <p><span class="result">Primero(T) = {1, 2, 3, 4, 7, 8}</span></p>
+  <h3>Ejemplo 3</h3>
+  <pre>R -> T9
+T -> AE
+A -> BCD
+B -> 1 | 2 | ε
+C -> 3 | ε
+D -> 3 | 4 | ε
+E -> C | 7</pre>
+  <pre>Primero(R) = Primero(T9) = Primero(AE) = Primero(A) = Primero(BCD)
+
+           = {1,2} U Primero(CD) = {1,2} U {3} U Primero(D) = {1,2} U {3} U {3,4} U Siguiente(A)
+
+Primero(R) = Primero(T9) = Primero(AE) = {1,2,3,4} U Siguiente(A) = {1,2,3,4} U Primero(E)
+
+           = {1,2,3,4} U {7} U Primero(C) = {1,2,3,4} U {7} U {3} U Siguiente(E)
+
+Primero(AE) = Primero(T) = {1,2,3,4} U {7} U {3} U Siguiente(T) = {1,2,3,4,7} U {9}</pre>
+  <p><span class="result">Primero(R) = {1, 2, 3, 4, 7, 9}</span></p>
+
+  <p style="margin-top:2em"><button class="btn primary" data-goto="clase">Ir a los ejercicios en clase</button></p>
+</section>
+
+<!-- ================= EN CLASE ================= -->
+<section id="clase" role="tabpanel" aria-labelledby="tab-clase" hidden>
+  <div class="class-layout">
+    <div class="ex-list" id="ex-list" aria-label="Ejercicios"></div>
+    <div class="stage">
+      <div class="stage-top">
+        <div class="panel grammar"><h3>Gramática</h3><pre id="g-text"></pre></div>
+        <div class="panel board"><h3>Pizarrón</h3><ol id="board"></ol></div>
+      </div>
+      <div class="question" aria-live="polite">
+        <div class="q-meta"><span id="q-count"></span><div class="dots" id="dots"></div><span class="goal" id="q-goal"></span></div>
+        <p class="q-text" id="q-text"></p>
+        <div class="opts" id="opts"></div>
+        <div class="answer" id="answer" hidden></div>
+        <div class="controls">
+          <button class="btn" id="prev">Anterior</button>
+          <button class="btn primary" id="next">Mostrar respuesta</button>
+          <button class="btn" id="restart">Reiniciar ejercicio</button>
+          <span class="hint">Teclado: → o espacio avanza, ← vuelve, 1–4 elige</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ---------- tabs, font size, theme ---------- */
+const tabs=[...document.querySelectorAll('nav button')];
+function showTab(id){
+  tabs.forEach(t=>t.setAttribute('aria-selected', t.dataset.target===id));
+  document.querySelectorAll('main > section').forEach(s=>s.hidden = s.id!==id);
+  window.scrollTo(0,0);
+}
+tabs.forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.target)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.goto)));
+let fs=18;
+try{ const v=parseInt(localStorage.getItem('pre-fs')); if(v) fs=v; }catch(e){}
+function setFs(v){ fs=Math.max(14,Math.min(30,v)); document.documentElement.style.setProperty('--fs',fs+'px'); try{localStorage.setItem('pre-fs',fs)}catch(e){} }
+setFs(fs);
+document.getElementById('fs-up').onclick=()=>setFs(fs+2);
+document.getElementById('fs-down').onclick=()=>setFs(fs-2);
+document.getElementById('theme').onclick=()=>{
+  const r=document.documentElement; const cur=r.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  r.dataset.theme = cur==='dark'?'light':'dark';
+};
+
+/* ---------- guided exercises ---------- */
+const YN=['Sí','No'];
+const EX = [
+ { title:'Conflicto en Primero', sub:'S -> 1A2 | B3 | C45 | 16',
+   grammar:`S -> 1A2 | B3 | C45 | 16
+A -> 9 | 0
+B -> 7 | 89
+C -> 4 | 15`,
+   steps:[
+    {g:'¿S tiene conflictos?', q:'¿Qué tenemos que comparar para saber si S tiene conflictos?', o:['El Siguiente de S','El Primero de cada lado derecho de S','Sólo el Primero de A'], c:1,
+     a:'Los Primero de los lados derechos de S tienen que ser <b>disjuntos</b>.', b:['Primero(S) = Primero(1A2) U Primero(B3) U Primero(C45) U Primero(16)']},
+    {g:'¿S tiene conflictos?', q:'Primer lado derecho de S: 1A2. ¿Cuánto vale Primero(1A2)?', o:['{9, 0}','{1, 9, 0}','{1}'], c:2, a:'Empieza con el terminal 1. Lo que viene después no importa.', b:['Primero(1A2) = {1}']},
+    {g:'¿S tiene conflictos?', q:'Segundo lado derecho de S: B3. ¿Cuánto vale Primero(B3)?', o:['{7, 8}','{7, 89}','{3}'], c:0, a:'Empieza con B → Primero(B). B -> 7 | 89 → {7, 8}: del 89 sólo cuenta el 8.', b:['Primero(B3) = Primero(B) = {7,8}']},
+    {g:'¿S tiene conflictos?', q:'Tercer lado derecho de S: C45. ¿Cuánto vale Primero(C45)?', o:['{4}','{4, 1}','{4, 15}'], c:1, a:'Empieza con C → Primero(C). C -> 4 | 15 → {4, 1}: del 15 sólo cuenta el 1.', b:['Primero(C45) = Primero(C) = {4,1}']},
+    {g:'¿S tiene conflictos?', q:'Cuarto lado derecho de S: 16. ¿Cuánto vale Primero(16)?', o:['{1, 6}','{6}','{1}'], c:2, a:'Empieza con el terminal 1.', b:['Primero(16) = {1}']},
+    {g:'¿S tiene conflictos?', q:'Los Primero de S son {1}, {7, 8}, {4, 1} y {1}. ¿Hay conflicto?', o:YN, c:0, fixed:true, a:'Sí, y en tres producciones: 1A2, C45 (por C -> 15) y 16 empiezan con <b>1</b>.', b:['¿Hay conflicto? Sí → token 1 en 1A2, C45 y 16']},
+    {g:'Resolviendo el conflicto de S', q:'El 1 de C45 está adentro de C (por C -> 15). ¿Cuál es el primer paso para resolver el conflicto?', o:['Borrar la producción 16','Desagregar C','Agregarle ε a A'], c:1, a:'Reemplazamos C por sus lados derechos para que se vea el 1.', b:['S -> 1A2 | B3 | 445 | 1545 | 16']},
+    {g:'Resolviendo el conflicto de S', q:'Ahora S -> 1A2 | B3 | 445 | 1545 | 16. ¿Qué sacamos como factor común?', o:['El 1','El 4','El 5'], c:0, a:'Las tres producciones que empiezan con 1 pasan a un nuevo no terminal Z.', b:['S -> B3 | 445 | 1Z','Z -> A2 | 545 | 6']},
+    {g:'Resolviendo el conflicto de S', q:'Quedó S -> B3 | 445 | 1Z y Z -> A2 | 545 | 6. ¿Ahora los Primero de los lados derechos de S y de Z son disjuntos?', o:YN, c:0, fixed:true, a:'En S: Primero(B3) = {7, 8}, Primero(445) = {4}, Primero(1Z) = {1}. En Z: Primero(A2) = Primero(A) = {9, 0}, Primero(545) = {5}, Primero(6) = {6}. Ningún token se repite dentro de cada no terminal.', b:['S: {7,8} | {4} | {1}   →  sin tokens repetidos','Z: {9,0} | {5} | {6}   →  sin tokens repetidos → conflicto eliminado']}
+   ]},
+ { title:'Conjunto Siguiente', sub:'S -> XaYf', grammar:`S -> XaYf
+X -> e | ε
+Y -> bYZ | c
+Z -> d | ε`,
+   steps:[
+    {g:'Calculando Siguiente(X)', q:'Queremos Siguiente(X). ¿Dónde buscamos?', o:['En las producciones de X','En los lados derechos donde aparece X','En el Primero de X'], c:1,
+     a:'Siguiente mira lo que viene <b>después</b> de X, así que buscamos a X del lado derecho.', b:['X aparece en S -> XaYf']},
+    {g:'Calculando Siguiente(X)', q:'X aparece sólo en S -> XaYf. ¿Qué viene después de X?', o:['Y','e','a'], c:2, a:'X está seguido del terminal a.', b:['Siguiente(X) = {a}']},
+    {g:'Calculando Siguiente(Y)', q:'Queremos Siguiente(Y). ¿En cuántos lugares aparece Y del lado derecho?', o:['En uno','En dos','En ninguno'], c:1, a:'En S -> XaYf y en Y -> bYZ. Hay que mirar <b>todas</b> las apariciones.', b:['Y aparece en S -> XaYf y en Y -> bYZ']},
+    {g:'Calculando Siguiente(Y)', q:'Primera aparición de Y: S -> XaYf. ¿Qué le aporta al Siguiente(Y)?', o:['{f}','{a}','Siguiente(S)'], c:0, a:'Y está seguido del terminal f.', b:['S -> XaYf aporta {f}']},
+    {g:'Calculando Siguiente(Y)', q:'Segunda aparición de Y: Y -> bYZ, donde Y está seguido de Z. ¿Qué le aporta al Siguiente(Y)?', o:['Siguiente(Z)','Primero(Z) sin ε','La letra Z'], c:1, a:'Seguido de un no terminal → su Primero sin ε: {d}.', b:['Y -> bYZ aporta Primero(Z) sin ε = {d}']},
+    {g:'Calculando Siguiente(Y)', q:'Seguimos en Y -> bYZ. Con Z -> d | ε, ¿Z puede ser ε?', o:YN, c:0, fixed:true, a:'Sí → Y queda al final de Y -> bYZ y suma Siguiente(Y)… que es lo que estamos calculando, así que no agrega nada nuevo.', b:['Z puede ser ε → U Siguiente(Y) (no agrega nada)']},
+    {g:'Calculando Siguiente(Y)', q:'S -> XaYf aportó {f} y Y -> bYZ aportó {d}. ¿Cuánto vale Siguiente(Y)?', o:['{f}','{d, f, ε}','{d, f}'], c:2, a:'{f} U {d}. Siguiente nunca lleva ε.', b:['Siguiente(Y) = {d,f}']},
+    {g:'Calculando Siguiente(Z)', q:'Queremos Siguiente(Z). Z aparece sólo en Y -> bYZ. ¿Cuánto vale Siguiente(Z)?', o:['{d, f}','{d}','{b, c}'], c:0, a:'Z es el último en Y -> bYZ → va Siguiente(Y).', b:['Siguiente(Z) = Siguiente(Y) = {d,f}']}
+   ]},
+ { title:'Primero con ε', sub:'S -> PQ9', grammar:`S -> PQ9
+P -> RT
+R -> 1 | ε
+T -> 2 | 3 | ε
+Q -> T | 4`,
+   steps:[
+    {g:'Calculando Primero(S)', q:'Queremos Primero(S) = Primero(PQ9). ¿Por dónde seguimos?', o:['Primero(Q)','Primero(P) = Primero(RT)','{9}'], c:1, a:'P es el primer símbolo y es no terminal.', b:['Primero(S) = Primero(PQ9) = Primero(P) = Primero(RT)']},
+    {g:'Calculando Primero(S)', q:'Estamos en Primero(RT), con R -> 1 | ε. ¿R puede ser ε?', o:YN, c:0, fixed:true, a:'Sí → tomamos {1} y sumamos Siguiente(R): lo que viene después, T.', b:['= {1} U Siguiente(R) = {1} U Primero(T)']},
+    {g:'Calculando Primero(S)', q:'Ya tenemos {1} y pasamos a T, con T -> 2 | 3 | ε. ¿T puede ser ε?', o:YN, c:0, fixed:true, a:'Sí → tomamos {2, 3} y sumamos Siguiente(T).', b:['= {1} U {2,3} U Siguiente(T)']},
+    {g:'Calculando Primero(S)', q:'Ya tenemos {1, 2, 3}, pero T es el último símbolo de P -> RT. ¿Qué hacemos?', o:['Cortamos acá','Subimos: Siguiente(P) = Primero(Q9)','Sumamos ε'], c:1, a:'P puede derivar la palabra nula → subimos y miramos qué viene después de P en S -> PQ9.', b:['= {1,2,3} U Siguiente(P) = {1,2,3} U Primero(Q)']},
+    {g:'Calculando Primero(S)', q:'En S -> PQ9, después de P viene Q. Con Q -> T | 4, ¿qué le aporta Q al Primero(S)?', o:['Sólo {4}','{4, T}','Primero(T) U {4}'], c:2, a:'De Q -> T sale {2, 3, ε} y de Q -> 4 sale {4}.', b:['= {1,2,3} U {2,3} U {4} U Siguiente(Q)']},
+    {g:'Calculando Primero(S)', q:'Q puede ser ε (por Q -> T y T -> ε). En S -> PQ9, ¿qué viene después de Q?', o:['9','4','Nada'], c:0, a:'En S -> PQ9, después de Q viene el 9.', b:['Siguiente(Q) = {9}']},
+    {g:'Calculando Primero(S)', q:'Juntando {1}, {2, 3}, {4} y {9}: ¿cuánto vale Primero(S)?', o:['{1, 2, 3, 4}','{1, 2, 3, 4, 9}','{1, 2, 3, 4, 9, ε}'], c:1, a:'Juntamos todo. No lleva ε porque el 9 es terminal.', b:['Primero(S) = {1,2,3,4,9}']}
+   ]},
+ { title:'Ejercicio completo', sub:'E -> TF', grammar:`E -> TF
+F -> +E | ε
+T -> (E) | n`,
+   steps:[
+    {g:'Calculando Primero(T)', q:'Con T -> (E) | n, ¿cuánto vale Primero(T)?', o:['{(, n}','{(}','{(, E, n}'], c:0, a:'T -> (E) | n: dos terminales.', b:['Primero(T) = {(, n}']},
+    {g:'Calculando Primero(E)', q:'Queremos Primero(E) = Primero(TF). ¿T puede ser ε?', o:YN, c:1, fixed:true, a:'No → nos quedamos con Primero(T), no hace falta mirar F.', b:['Primero(E) = Primero(TF) = Primero(T) = {(, n}']},
+    {g:'Calculando Primero(F)', q:'Con F -> +E | ε, ¿cuánto vale Primero(F)?', o:['{+}','{+, ε}','{+, (, n}'], c:1, a:'F -> +E empieza con el terminal <b>+</b>, así que ahí corta: no se mira E. Y F -> ε aporta el <b>ε</b>.', b:['Primero(F) = Primero(+E) U Primero(ε) = {+} U {ε} = {+, ε}']},
+    {g:'Calculando Siguiente(E)', q:'Queremos Siguiente(E). ¿Dónde aparece E del lado derecho?', o:['En T -> (E) y en F -> +E','Sólo en T -> (E)','En E -> TF'], c:0, a:'Hay que mirar las dos apariciones.', b:['E aparece en T -> (E) y en F -> +E']},
+    {g:'Calculando Siguiente(E)', q:'E aparece en T -> (E) y en F -> +E. ¿Qué le aporta cada una al Siguiente(E)?', o:['{)} y nada','{)} y Siguiente(F)','{(} y Siguiente(F)'], c:1, a:'En T -> (E) viene el terminal ). En F -> +E, E es el último → Siguiente(F).', b:['Siguiente(E) = {)} U Siguiente(F)']},
+    {g:'Calculando Siguiente(F)', q:'Queremos Siguiente(F). F aparece sólo en E -> TF. ¿Cuánto vale Siguiente(F)?', o:['Siguiente(E)','{+}','{ε}'], c:0, a:'F es el último en E -> TF → Siguiente(F) = Siguiente(E). Y Siguiente(E) = {)} U Siguiente(F): se llaman entre sí, así que ninguno agrega nada nuevo al otro. Los dos quedan en {)}.', b:['Siguiente(F) = Siguiente(E)','Siguiente(E) = {)} U Siguiente(F) = {)}   →   Siguiente(F) = {)}']},
+    {g:'Calculando Siguiente(T)', q:'Queremos Siguiente(T). T aparece en E -> TF, seguido de F. ¿Cuánto vale Siguiente(T)?', o:['{+}','{+, )}','{)}'], c:1, a:'En E -> TF viene F → Primero(F) sin ε = {+}. F puede ser ε → T queda al final → Siguiente(E) = {)}.<br>El <b>)</b> nunca está escrito después de T, pero llega heredado por E. Ejemplo con la cadena <b>(n)</b>:<pre>E => TF => (E)F => (TF)F => (T)F => (n)F => (n)</pre>En <b>(T)F</b>, después de T viene el <b>)</b>: el T de adentro sale de E -> TF, F desaparece, y lo que sigue a ese E es el ) de T -> (E).', b:['Siguiente(T) = {+} U Siguiente(E) = {+, )}','Ej.: E => TF => (E)F => (TF)F => (T)F → T seguido de )']}
+   ]}
+];
+
+let ex=0, st=0, revealed=false, chosen=null, lastAdded=-1;
+const perms={};
+function perm(){ const k=ex+'-'+st; if(!perms[k]){ const S=EX[ex].steps[st]; const idx=S.o.map((_,i)=>i);
+  if(!S.fixed){ for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; } }
+  perms[k]=idx; } return perms[k]; }
+const $=id=>document.getElementById(id);
+function renderList(){
+  $('ex-list').innerHTML='';
+  EX.forEach((e,i)=>{
+    const b=document.createElement('button');
+    b.innerHTML=`${i+1}. ${e.title}<small>${e.sub}</small>`;
+    if(i===ex) b.setAttribute('aria-current','true');
+    b.onclick=()=>{ex=i;st=0;revealed=false;chosen=null;lastAdded=-1;render();};
+    $('ex-list').appendChild(b);
+  });
+}
+function render(){
+  renderList();
+  const E=EX[ex], S=E.steps[st];
+  $('g-text').textContent=E.grammar;
+  // board: lines of all revealed steps
+  const upto = revealed ? st : st-1;
+  const ol=$('board'); ol.innerHTML='';
+  let any=false;
+  for(let i=0;i<=upto;i++){ E.steps[i].b.forEach(line=>{
+    const li=document.createElement('li'); li.textContent=line; if(i===upto && revealed && lastAdded===st) li.className='new'; ol.appendChild(li); any=true; }); }
+  if(!any){ ol.innerHTML='<li class="empty">Acá se va armando el cálculo a medida que respondemos.</li>'; }
+  $('q-count').textContent=`Pregunta ${st+1} de ${E.steps.length}`;
+  $('dots').innerHTML=E.steps.map((_,i)=>`<span class="${i<st?'done':i===st?'cur':''}"></span>`).join('');
+  $('q-text').textContent=S.q;
+  $('q-goal').textContent=S.g||'';
+  const opts=$('opts'); opts.innerHTML='';
+  perm().forEach((i,pos)=>{ const t=S.o[i];
+    const b=document.createElement('button');
+    b.innerHTML=`<span class="k">${pos+1}</span><span>${t}</span>`;
+    if(chosen===i) b.classList.add('sel');
+    if(revealed){ b.disabled=true; if(i===S.c) b.classList.add('right'); else if(i===chosen) b.classList.add('wrong'); }
+    b.onclick=()=>{ if(!revealed){ chosen=i; render(); } };
+    opts.appendChild(b);
+  });
+  const ans=$('answer');
+  if(revealed){ ans.hidden=false; ans.innerHTML=(chosen===null?'':chosen===S.c?'<b>¡Bien!</b> ':'<b>No era esa.</b> ')+S.a; }
+  else ans.hidden=true;
+  const last = st===E.steps.length-1;
+  $('next').textContent = !revealed ? 'Mostrar respuesta' : last ? (ex<EX.length-1?'Ir al próximo ejercicio':'Terminado') : 'Siguiente pregunta';
+  $('next').disabled = revealed && last && ex===EX.length-1;
+  $('prev').disabled = st===0 && !revealed;
+}
+function next(){
+  const E=EX[ex];
+  if(!revealed){ revealed=true; lastAdded=st; render(); return; }
+  if(st<E.steps.length-1){ st++; revealed=false; chosen=null; render(); }
+  else if(ex<EX.length-1){ ex++; st=0; revealed=false; chosen=null; lastAdded=-1; render(); }
+}
+function prev(){
+  if(revealed){ revealed=false; chosen=null; lastAdded=-1; render(); return; }
+  if(st>0){ st--; revealed=true; chosen=null; lastAdded=-1; render(); }
+}
+$('next').onclick=next; $('prev').onclick=prev;
+$('restart').onclick=()=>{st=0;revealed=false;chosen=null;lastAdded=-1;render();};
+document.addEventListener('keydown',e=>{
+  if($('clase').hidden) return;
+  if(e.key==='ArrowRight' || e.key===' '){ e.preventDefault(); next(); }
+  else if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); }
+  else if(/^[1-4]$/.test(e.key) && !revealed){ const i=+e.key-1; const P=perm(); if(i<P.length){ chosen=P[i]; render(); } }
+});
+render();
+
+</script>
+</body>
+</html>
